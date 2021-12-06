@@ -117,7 +117,7 @@
   "peerDependencies": {
     "@sap/hana-client": "*",
     "better-sqlite3": "*",
-    "hdb-pool": "^0.1.6",
+    "hdb-pool": "*",
     "ioredis": "*",
     "mongodb": "^3.6.0",
     "mssql": "*",
