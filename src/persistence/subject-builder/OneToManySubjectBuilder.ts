@@ -184,6 +184,7 @@ export class OneToManySubjectBuilder {
                 } else if (relation.inverseRelation.orphanedRowAction === "delete") {
                     removedRelatedEntitySubject.mustBeRemoved = true;
                 }
+
                 this.subjects.push(removedRelatedEntitySubject);
             });
     }
