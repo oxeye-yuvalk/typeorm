@@ -4,6 +4,7 @@ import { reloadTestingDatabases, createTestingConnections, closeTestingConnectio
 import { expect } from "chai";
 import { Category } from "./entity/Category";
 import { Post } from "./entity/Post";
+import {Author} from "./entity/Author";
 
 describe.only("Soft Delete Recursive cascade", () => {
 
@@ -28,21 +29,33 @@ describe.only("Soft Delete Recursive cascade", () => {
     describe("when a Post is removed from a Category", () => {
         let categoryRepository: Repository<Category>;
         let postRepository: Repository<Post>;
+        let authorRepository: Repository<Author>;
 
         beforeEach(async () => {
             await Promise.all(connections.map(async connection => {
                 categoryRepository = connection.getRepository(Category);
                 postRepository = connection.getRepository(Post);
+                authorRepository = connection.getRepository(Author);
             }));
-
+            const firstPost: Post = new Post();
+            firstPost.authors = [
+                new Author(),
+                new Author()
+            ];
+            const secondPost: Post = new Post();
+            secondPost.authors = [
+                new Author(),
+                new Author()
+            ];
             const categoryToInsert = await categoryRepository.save(new Category());
             categoryToInsert.posts = [
-                new Post(),
-                new Post()
+                firstPost,
+                secondPost
             ];
 
             await categoryRepository.save(categoryToInsert);
-            await categoryRepository.softRemove(categoryToInsert);
+            let insertedCategory: Category = await categoryRepository.findOneOrFail();
+            await categoryRepository.softRemove(insertedCategory);
         });
 
         it("should delete the category", async () => {
@@ -53,6 +66,10 @@ describe.only("Soft Delete Recursive cascade", () => {
         it("should delete the all the posts", async () => {
             const postCount = await postRepository.count();
             expect(postCount).to.equal(0);
+        });
+        it("should delete the all the authors", async () => {
+            const authorsCount = await authorRepository.count();
+            expect(authorsCount).to.equal(0);
         });
     });
 });
